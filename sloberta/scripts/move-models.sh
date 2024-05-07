@@ -1,0 +1,1 @@
+kubectl cp ./pv/ model-store-pod:/ -c model-store

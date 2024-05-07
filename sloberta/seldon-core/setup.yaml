@@ -1,0 +1,14 @@
+apiVersion: machinelearning.seldon.io/v1
+kind: SeldonDeployment
+metadata:
+  name: sloberta-model
+  namespace: seldon
+spec:
+  name: sloberta
+  predictors:
+    - graph:
+        implementation: PYTORCH_SERVER
+        modelUri: "pvc://task-pv-claim/"
+        name: classifier
+      name: default
+      replicas: 1

@@ -1,0 +1,16 @@
+[
+  {
+    "model-name": "sloberta",
+    "version": "1.0",
+    "model-file": "",
+    "serialized-file": "pytorch_model.bin",
+    "extra-files": "./",
+    "handler": "handler",
+    "min-workers": 1,
+    "max-workers": 3,
+    "batch-size": 1,
+    "max-batch-delay": 100,
+    "response-timeout": 120,
+    "requirements": ""
+  }
+]

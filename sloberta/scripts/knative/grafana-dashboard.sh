@@ -1,0 +1,1 @@
+kubectl port-forward  $(kubectl get pods --selector=app.kubernetes.io/name=grafana --output=jsonpath="{.items..metadata.name}") 3000

@@ -1,0 +1,1 @@
+torch-model-archiver --model-name sloberta-squad2 --version 1.0 --serialized-file ./sloberta-squad2-SLO/pytorch_model.bin --handler model_handler.py --export-path model-store

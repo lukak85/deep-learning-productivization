@@ -1,0 +1,15 @@
+apiVersion: "serving.kserve.io/v1beta1"
+kind: "InferenceService"
+metadata:
+  name: "torchserve"
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8082"
+    prometheus.kserve.io/path: "/metrics"
+    serving.kserve.io/enable-prometheus-scraping: "true"
+    autoscaling.knative.dev/target: "1"
+spec:
+  predictor:
+    # minReplicas: 0
+    pytorch:
+      storageUri: "pvc://task-pv-claim/"

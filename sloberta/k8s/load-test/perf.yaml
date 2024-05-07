@@ -1,0 +1,53 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  generateName: load-test
+spec:
+  backoffLimit: 6
+  parallelism: 1
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - args:
+            - vegeta -cpus=5 attack -duration=1m -rate=500/1s -targets=/var/vegeta/cfg
+              | vegeta report -type=text
+            - "-header=Host: torchserve.default.example.com"
+          command:
+            - sh
+            - -c
+          image: peterevans/vegeta:latest
+          imagePullPolicy: Always
+          name: vegeta
+          volumeMounts:
+            - mountPath: /var/vegeta
+              name: vegeta-cfg
+      volumes:
+        - configMap:
+            defaultMode: 420
+            name: vegeta-cfg
+          name: vegeta-cfg
+---
+apiVersion: v1
+data:
+  cfg: |
+    POST http://localhost:80/v1/models/sloberta:predict
+    @/var/vegeta/payload
+  payload: |
+    {
+      "instances": [
+        {
+          "data": {
+            "text": "Ljubljana je glavno mesto Slovenije in njeno politično, gospodarsko, kulturno ter znanstveno središče. Mesto stoji na območju, kjer se alpski svet sreča z dinarskim, kar daje Ljubljani poseben čar. Ljubljanica, reka, ki prečka mesto, je bila skozi zgodovino pomembna za razvoj mesta, od prazgodovinskih naselbin do današnje sodobne prestolnice. Ljubljana je znana po svoji univerzi, ki je bila ustanovljena leta 1919, in po številnih muzejih, gledališčih in knjižnicah.",
+            "question": "Katera reka prečka mesto Ljubljana?"
+          }
+        }
+      ]
+    }
+kind: ConfigMap
+metadata:
+  annotations:
+  name: vegeta-cfg
