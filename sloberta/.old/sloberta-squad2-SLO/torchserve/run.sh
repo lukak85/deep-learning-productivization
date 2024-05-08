@@ -1,1 +1,0 @@
-torchserve --start --model-store model_store --models sloberta.mar --ncs --ts-config ./config/config.properties

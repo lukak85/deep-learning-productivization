@@ -1,0 +1,1 @@
+curl http://localhost:8085/predictions/sloberta -T ./../test/examples/example1_local.json
