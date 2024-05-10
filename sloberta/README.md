@@ -5,6 +5,7 @@ The [SloBERTa](http://hdl.handle.net/11356/1778) model is a Transformer-based so
 We provide the following deployment options for the SloBERTa model:
 
 - [Locally](#locally)
+- [With Flask](#with-flask)
 - [With TorchServe](#with-torchserve)
 - [With Docker](#with-docker)
   - [GPU Support](#gpu-support)
@@ -47,6 +48,20 @@ Expected result:
 
 ```bash
 Ljubljanica
+```
+
+## With Flask
+
+We deploy a Flask server exposing an endpoint POST taking in a JSON example and returning the answer to the question. Run the Flask server by moving inside the [flask](./flask/) directory and running the following command:
+
+```bash
+python flask-server.py
+```
+
+Run an inference on the model by running the following inside [examples](./test/examples/) directory:
+
+```bash
+curl -v -H "Content-Type: application/json" http://localhost:5000/predict -d @./example1.json
 ```
 
 ## With TorchServe
