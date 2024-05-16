@@ -256,6 +256,40 @@ Run the follwoing command with [Hey](https://github.com/rakyll/hey) (preforms th
 hey -z 30s -c 5 -m POST -host torchserve.default.example.com -H "Content-Type: application/json" -d '{"instances":[{"data":{"text":"Ljubljana je glavno mesto Slovenije in njeno politično, gospodarsko, kulturno ter znanstveno središče. Mesto stoji na območju, kjer se alpski svet sreča z dinarskim, kar daje Ljubljani poseben čar. Ljubljanica, reka, ki prečka mesto, je bila skozi zgodovina pomembna za razvoj mesta, od prazgodovinskih naselbin do današnje sodobne prestolnice. Ljubljana je znana po svoji univerzi, ki je bila ustanovljena leta 1919, in po številnih muzejih, gledališčih in knjižnicah.","question":"Katera reka prečka mesto Ljubljana?"}}]}' http://localhost:80/v1/models/sloberta:predict
 ```
 
+### Explaining Predictions <!-- omit in toc -->
+
+For a given prediction a model explainers answers the question "Why did my model make this prediction?". KServe integrates [Alibi Explainer](https://github.com/SeldonIO/alibi) implementing a black-box algorithm by generating a bunch of similar instances for a given input and sends them out to model explainer to get the explanation.
+
+TODO: Add implementation.
+
 ## With Seldon Core
 
-TODO
+For Seldon Core installation, read [Install Locally](https://docs.seldon.io/projects/seldon-core/en/latest/install/kind.html).
+
+Port forward using the following command:
+
+```bash
+kubectl port-forward -n istio-system svc/istio-ingressgateway 8080:80
+```
+
+Moving inside the [seldon-core](/sloberta/seldon-core/) directory, build a Docker image by running the following command:
+
+```bash
+./build.sh
+```
+
+Deploy the model by running the following command:
+
+```bash
+kubectl apply -f ./k8/setup.yaml
+```
+
+### Testing the Model <!-- omit in toc -->
+
+#### Running a Basic Inference <!-- omit in toc -->
+
+Inside the [seldon-core](/sloberta/seldon-core/) folder inference on the model by running the following command:
+
+```bash
+./inference.sh
+```

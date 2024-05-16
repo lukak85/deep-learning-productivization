@@ -1,0 +1,1 @@
+curl -X GET http://localhost:8080/seldon/default/transformers/api/

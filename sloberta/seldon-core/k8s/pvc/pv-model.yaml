@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: model-pod
+spec:
+  volumes:
+    - name: model
+      persistentVolumeClaim:
+        claimName: task-pv-claim
+  containers:
+    - name: model
+      image: ubuntu
+      command: ["sleep"]
+      args: ["infinity"]
+      volumeMounts:
+        - mountPath: "/pv"
+          name: model
+      resources:
+        limits:
+          memory: "1Gi"
+          cpu: "1"

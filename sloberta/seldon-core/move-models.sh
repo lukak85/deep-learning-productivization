@@ -1,0 +1,1 @@
+kubectl cp ./model/ model-pod:/ -c model

@@ -1,0 +1,2 @@
+transformers==4.37.2
+seldon-core==1.18.1

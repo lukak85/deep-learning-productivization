@@ -1,0 +1,1 @@
+seldon-core-microservice MyModel --service-type MODEL

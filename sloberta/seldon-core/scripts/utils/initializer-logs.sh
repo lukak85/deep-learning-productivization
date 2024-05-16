@@ -1,0 +1,1 @@
+kubectl logs $1 -c transformer-model-initializer

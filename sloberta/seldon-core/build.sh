@@ -1,0 +1,1 @@
+docker build . -t lukak85/sloberta-seldon:latest

@@ -1,0 +1,20 @@
+apiVersion: machinelearning.seldon.io/v1alpha2
+kind: SeldonDeployment
+metadata:
+  name: sloberta-model
+spec:
+  name: sloberta
+  predictors:
+    - componentSpecs:
+        - spec:
+            containers:
+              - name: sloberta-node
+                image: lukak85/sloberta-seldon:latest
+      graph:
+        name: sloberta-node
+        type: MODEL
+        children: []
+        endpoint:
+          type: REST
+      name: sloberta
+      replicas: 1

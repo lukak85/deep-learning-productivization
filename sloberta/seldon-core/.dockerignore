@@ -1,0 +1,7 @@
+./install.sh
+./client.py
+./inference.sh
+./setup_local.sh
+./setup.sh
+./setup.yaml
+./utils.py

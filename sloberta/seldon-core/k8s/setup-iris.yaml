@@ -1,14 +1,13 @@
 apiVersion: machinelearning.seldon.io/v1
 kind: SeldonDeployment
 metadata:
-  name: sloberta-model
-  namespace: seldon
+  name: iris-model
 spec:
-  name: sloberta
+  name: iris
   predictors:
     - graph:
-        implementation: PYTORCH_SERVER
-        modelUri: "pvc://task-pv-claim/"
+        implementation: SKLEARN_SERVER
+        modelUri: gs://seldon-models/v1.19.0-dev/sklearn/iris
         name: classifier
       name: default
       replicas: 1

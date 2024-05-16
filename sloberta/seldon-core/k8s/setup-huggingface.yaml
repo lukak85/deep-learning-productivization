@@ -1,0 +1,20 @@
+apiVersion: machinelearning.seldon.io/v1alpha2
+kind: SeldonDeployment
+metadata:
+  name: sloberta-model
+spec:
+  protocol: v2
+  predictors:
+    - graph:
+        name: transformer
+        implementation: HUGGINGFACE_SERVER
+        modelUri: "pvc://task-pv-claim/"
+        parameters:
+          - name: task
+            type: STRING
+            value: question-answerin
+          - name: pretrained_model # this is the extra param
+            type: STRING
+            value: /mnt/models
+      name: default
+      replicas: 1
