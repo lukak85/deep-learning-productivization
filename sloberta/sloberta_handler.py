@@ -128,10 +128,3 @@ class SloBERTaHandler(BaseHandler):
         logger.debug(f"Answer: {answer}")
 
         return [answer]
-
-    def get_insights(self, **kwargs):
-        """
-        Functionality to get the explanations.
-        Called from the explain_handle method
-        """
-        pass
