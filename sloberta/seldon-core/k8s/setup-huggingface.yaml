@@ -8,13 +8,10 @@ spec:
     - graph:
         name: transformer
         implementation: HUGGINGFACE_SERVER
-        modelUri: "pvc://task-pv-claim/"
+        modelUri: pvc://task-pv-claim/
         parameters:
           - name: task
             type: STRING
-            value: question-answerin
-          - name: pretrained_model # this is the extra param
-            type: STRING
-            value: /mnt/models
+            value: question-answering
       name: default
       replicas: 1

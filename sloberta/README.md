@@ -12,6 +12,8 @@ We provide the following deployment options for the SloBERTa model:
 - [With NVIDIA Triton Inference Server](#with-nvidia-triton-inference-server)
 - [With KServe](#with-kserve)
 - [With Seldon Core](#with-seldon-core)
+  - [Using Docker](#using-docker)
+  - [Deploying a HuggingFace Model](#deploying-a-huggingface-model)
 
 ### Requirements <!-- omit in toc -->
 
@@ -272,6 +274,8 @@ Port forward using the following command:
 kubectl port-forward -n istio-system svc/istio-ingressgateway 8080:80
 ```
 
+### Using Docker
+
 Moving inside the [seldon-core](/sloberta/seldon-core/) directory, build a Docker image by running the following command:
 
 ```bash
@@ -284,12 +288,64 @@ Deploy the model by running the following command:
 kubectl apply -f ./k8/setup.yaml
 ```
 
+### Deploying a HuggingFace Model
+
+Create a SC (Storage Class) by running the following command inside the [k8s](./k8s/) directory:
+
+```bash
+kubectl apply -f ./k8s/sc.yaml
+```
+
+Create PV (Persistent Volume) and PVC (Persistent Volume Claim) by running the following command inside the [k8s](./k8s/) directory:
+
+```bash
+kubectl apply -f ./k8s/pv-pvc.yaml
+```
+
+Moving inside the [seldon-core](/sloberta/seldon-core/) directory, create a `model-store` pod by running the following command:
+
+```bash
+kubectl apply -f ./k8s/pv-model.yaml
+```
+
+First move the [model-dir](/sloberta/model-dir/) directory inside the [seldon-core](/sloberta/seldon-core/) directory. Then move the model from your local machine to the `model-pod` by running the following command:
+
+```bash
+kubectl cp ./pv/ model-pod:/ -c model
+```
+
+To deploy a HuggingFace model, run the following command:
+
+```bash
+kubectl apply -f ./k8/setup-huggingface.yaml
+```
+
 ### Testing the Model <!-- omit in toc -->
 
 #### Running a Basic Inference <!-- omit in toc -->
 
-Inside the [seldon-core](/sloberta/seldon-core/) folder inference on the model by running the following command:
+Run the inference on the model inside [seldon-core](/sloberta/seldon-core/) by running the following command if the model was deployed
 
-```bash
-./inference.sh
-```
+- [using docker](#using-docker), :
+
+  ```bash
+  ./inference.sh
+  ```
+
+  Expected result:
+
+  ```bash
+  {"meta":{"requestPath":{"sloberta-node":"lukak85/sloberta-seldon:latest"}},"strData":"Ljubljanica"}
+  ```
+
+- [using HuggingFace](#deploying-a-huggingface-model)
+
+  ```bash
+  ./inference-huggingface.sh
+  ```
+
+  Expected result:
+
+  ```bash
+  {"model_name":"transformer","model_version":"v1","id":"93473767-0c53-45bf-8ef6-c446d1905a4a","parameters":{},"outputs":[{"name":"output","shape":[1,1],"datatype":"BYTES","parameters":{"content_type":"hg_jsonlist"},"data":["{\"score\": 0.6845098733901978, \"start\": 198, \"end\": 209, \"answer\": \"Ljubljanica\"}"]}]}
+  ```
