@@ -10,6 +10,7 @@ We provide the following deployment options for the SloBERTa model:
 - [With Docker](#with-docker)
   - [GPU Support](#gpu-support)
 - [With NVIDIA Triton Inference Server](#with-nvidia-triton-inference-server)
+- [With BentoML](#with-bentoml)
 - [With KServe](#with-kserve)
 - [With Seldon Core](#with-seldon-core)
   - [Using Docker](#using-docker)
@@ -188,6 +189,20 @@ Expected result:
 
 ```bash
 Answer: Ljubljanica
+```
+
+## With BentoML
+
+To deploy the model with BentoML, move inside the [bentoml](/sloberta/bentoml/) directory and run the following command:
+
+```bash
+bentoml serve service:QuestionAnsweringService
+```
+
+Then run an inference on the model by running:
+
+```bash
+./inference.sh
 ```
 
 ## With KServe
