@@ -180,7 +180,7 @@ sloberta/.old/prometheus/
 sloberta/.old/prometheus-config/
 
 # Ignore the dataset folder
-sloberta/dataset/
+*dataset/
 
 # Ignore temporary files
 *temp/
