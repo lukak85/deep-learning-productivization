@@ -54,26 +54,34 @@ def main(host, port):
     # cap = cv2.VideoCapture("../../../datasets/traffic/cctv052x2004080620x00108.avi")
     cap = cv2.VideoCapture("../../testing/test.mp4")
 
+    ratio = None
+
     while True:
         ret, frame = cap.read()
+
+        if ratio is None:
+            ratio = (frame.shape[0] / IMAGE_SIZE[0], frame.shape[1] / IMAGE_SIZE[1])
+            print(frame.shape)
+            print(IMAGE_SIZE)
+            print(ratio)
+
         if not ret:
             break
 
         results = detect(triton_client, frame)
 
         # Draw boxes
-        img = cv2.resize(frame, (640, 640))
         if results[0] is not None and isinstance(results[0], torch.Tensor):
             results = results[0].numpy()
             for result in results:
-                x1, y1 = int(result[0]), int(result[1])
-                x2, y2 = int(result[2]), int(result[3])
+                x1, y1 = int(result[0] * ratio[1]), int(result[1] * ratio[0])
+                x2, y2 = int(result[2] * ratio[1]), int(result[3] * ratio[0])
                 conf = result[4]
                 label = LABELS[int(result[5])]
                 text = f"{label} {conf:.2f}"
-                cv2.rectangle(img, (x1, y1), (x2, y2), (255, 255, 0), 2)
+                cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 255, 0), 2)
                 cv2.putText(
-                    img,
+                    frame,
                     text,
                     (x1, y1 - 5),
                     cv2.FONT_HERSHEY_PLAIN,
@@ -82,7 +90,7 @@ def main(host, port):
                     2,
                 )
 
-        cv2.imshow("frame", img)
+        cv2.imshow("frame", frame)
         if cv2.waitKey(1) & 0xFF == ord("q"):
             break
 
