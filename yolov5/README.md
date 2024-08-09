@@ -64,3 +64,17 @@ Inside the [triton-inference-server](/yolov5/triton-inference-server/) folder, r
 ```
 
 This will start the Triton Inference Server with the YOLOv5 model. The server will be running on `localhost:8001` for gRPC.
+
+### SLURM with Apptainer adaptation
+
+In order to run our model on HPC, we need to adapt it to the Apptainer format. To do that, we first pull the NVIDIA Triton Inference Server container using this command:
+
+```bash
+apptainer pull tritonserver.sif docker://nvcr.io/nvidia/tritonserver:23.03-py3
+```
+
+We then run the model using the following command:
+
+```bash
+srun -G1 --partition=gpu apptainer run --nv --bind ${PWD}/model_repository:/mnt/model_repository ${PWD}/tritonserver.sif tritonserver --model-repository=/mnt/model_repository --log-verbose 1
+```
