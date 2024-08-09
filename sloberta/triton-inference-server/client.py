@@ -1,62 +1,46 @@
 import json
 
 import numpy as np
-import torch
-from transformers import AutoTokenizer, CamembertForQuestionAnswering
 
 import tritonclient.http as httpclient
 import tritonclient.grpc as grpcclient
 
 
-model_dir = "./../model-dir"
-
-tokenizer = AutoTokenizer.from_pretrained(model_dir)
-
-
 def answer_question(triton_client, text, question, timeout=None):
-    input_tokens = tokenizer(question, text, return_tensors="pt")
-
-    sequence_length = input_tokens["input_ids"].shape[1]
-
     # http_tensors = [
-    #     httpclient.InferInput("attention_mask", (1, sequence_length), "INT64"),
     #     httpclient.InferInput("input_ids", (1, sequence_length), "INT64"),
+    #     httpclient.InferInput("attention_mask", (1, sequence_length), "INT64"),
     # ]
 
     inputs = [
-        grpcclient.InferInput("input_ids", (1, sequence_length), "INT64"),
-        grpcclient.InferInput("attention_mask", (1, sequence_length), "INT64"),
+        grpcclient.InferInput("text", [1], "BYTES"),
+        grpcclient.InferInput("question", [1], "BYTES"),
     ]
-
-    outputs = [grpcclient.InferRequestedOutput("logits")]
 
     # Tokenized input tensors -> triton.
     # http_tensors[0].set_data_from_numpy(inputs["attention_mask"].numpy())
     # http_tensors[1].set_data_from_numpy(inputs["input_ids"].numpy())
 
-    inputs[0].set_data_from_numpy(input_tokens["attention_mask"].numpy())
-    inputs[1].set_data_from_numpy(input_tokens["input_ids"].numpy())
+    inputs[0].set_data_from_numpy(np.array([str(text).encode("utf-8")], dtype=np.object_))
+    inputs[1].set_data_from_numpy(np.array([str(question).encode("utf-8")], dtype=np.object_))
 
+    outputs = [grpcclient.InferRequestedOutput("answer")]
+    
     # Get the result from the server.
     result = triton_client.infer(
         model_name="sloberta", inputs=inputs, outputs=outputs, timeout=timeout
     )
 
-    # Reshape back to `sequence_length`
-    server_start = result.as_numpy(f"logits")[0][:sequence_length]
-    server_end = result.as_numpy(f"logits")[1][:sequence_length]
+    # 
+    # Extract the answer from the response; also hack to remove b" at the start and " at the end,
+    # and convert single quotes to double quotes
+    answer = str(result.as_numpy("answer"))[2:-1].replace("'", '"')
 
-    # Use numpy to get the predicted start and end position from the
-    # output softmax scores.
-    answer_start_index = server_start.argmax()
-    answer_end_index = server_end.argmax()
-
-    predict_answer_tokens = input_tokens.input_ids[
-        0, answer_start_index : answer_end_index + 1
-    ]
+    # If we just want the answer
+    # answer = json.loads(answer)["answer"]
 
     # Convert it into human readable string,
-    return tokenizer.decode(predict_answer_tokens, skip_special_tokens=True)
+    return answer
 
 
 def main(host, port):

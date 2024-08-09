@@ -145,9 +145,34 @@ If NVIDIA GPU is present, add `--gpus all` to the `docker run` command:
 docker run --gpus all -dp 8085:8085 -p 8081:8081 --name sloberta sloberta
 ```
 
+## With BentoML
+
+To deploy the model with BentoML, move inside the [bentoml](/sloberta/bentoml/) directory and run the following command:
+
+```bash
+bentoml serve service:QuestionAnsweringService
+```
+
+Then run an inference on the model by running:
+
+```bash
+./inference.sh
+```
+
 ## With NVIDIA Triton Inference Server
 
-In order to deploy the model on NVIDIA Triton Inference Server, we first need to export the model to TorchScript. To do that, either:
+In order to deploy the model on NVIDIA Triton Inference Server, we use the deployment for HuggingFace models as suggested on [Deploying Hugging Face models](https://github.com/triton-inference-server/tutorials/tree/main/HuggingFace). In order to do that, we need to move the model we've downloaded in the [Locally](#locally) section to the [model_repository/sloberta/1](./triton-inference-server/model_repository/sloberta/1/) directory.
+
+Run the following command to start the model on Triton Inference Server:
+
+```bash
+./setup.sh
+```
+
+<details>
+  <summary>Alternative Deployment (using TorchScript)</summary>
+
+In order to deploy the model on NVIDIA Triton Inference Server using TorchScript, we first need to export the model to TorchScript. To do that, either:
 
 - move into the [triton-inference-server](./triton-inference-server/) directory and run the following command to export a TorchScript model:
 
@@ -175,6 +200,53 @@ Run the following command to start the model on Triton Inference Server:
 ./setup.sh
 ```
 
+Run the inference using the following command:
+
+```bash
+python client_torchserve.py -s localhost
+```
+
+</details>
+
+### SLURM with Apptainer adaptation
+
+In order to run our model on HPC, we need to adapt it to the Apptainer format. To do that, we first pull the NVIDIA Triton Inference Server container using this command:
+
+```bash
+apptainer build --sandbox tritonserver.sb docker://nvcr.io/nvidia/tritonserver:23.03-py3
+```
+
+We then go into the shell of the pulled container with the following command:
+
+```bash
+apptainer shell --fakeroot --writable tritonserver.sif/
+```
+
+Inside it we install the required packages:
+
+```bash
+pip install torch==2.0.1 torchvision==0.15.2 torchaudio==2.0.2 --index-url https://download.pytorch.org/whl/cu118
+pip install transformers==4.29.2
+```
+
+We then exit the shell:
+
+```bash
+exit
+```
+
+We build a new Apptainer container with the installed packages:
+
+```bash
+apptainer --debug build transfomrestritonserver.sif tritonserver.sb
+```
+
+We run the model using the following command:
+
+```bash
+srun -G1 --partition=gpu apptainer run --nv --bind ${PWD}/model_repository:/mnt/model_repository ${PWD}/transformertritonserver.sif tritonserver --model-repository=/mnt/model_repository --log-verbose 1
+```
+
 ### Testing the Model <!-- omit in toc -->
 
 #### Running a Basic Inference <!-- omit in toc -->
@@ -185,24 +257,13 @@ Use Triton Client to call Triton Inference Server and get the inference:
 python client.py -s localhost
 ```
 
+> [!NOTE]
+> When running on HPC, replace `localhost` with the IP address of the SLURM node.
+
 Expected result:
 
 ```bash
-Answer: Ljubljanica
-```
-
-## With BentoML
-
-To deploy the model with BentoML, move inside the [bentoml](/sloberta/bentoml/) directory and run the following command:
-
-```bash
-bentoml serve service:QuestionAnsweringService
-```
-
-Then run an inference on the model by running:
-
-```bash
-./inference.sh
+Answer: {'score': 0.9921855926513672, 'start': 197, 'end': 210, 'answer': ' Ljubljanica,'}
 ```
 
 ## With KServe
