@@ -190,6 +190,15 @@ sloberta/.old/prometheus-config/
 *tmp/
 *temporary/
 
+# Ignore Apptainer container images
+*.sif
+
+# Ignore zip files
+*.tar.gz
+
+# Ignore the media files
+*.avi
+
 # Other
 dev_utils/
 
