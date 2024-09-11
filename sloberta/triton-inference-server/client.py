@@ -1,7 +1,3 @@
-import json
-
-import numpy as np
-import torch
 from transformers import AutoTokenizer, CamembertForQuestionAnswering
 
 import tritonclient.http as httpclient

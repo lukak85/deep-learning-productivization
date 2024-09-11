@@ -4,32 +4,43 @@ import torch
 from utils import get_example
 
 
-model_dir = "./../model-dir"
+def main():
+    model_dir = "./../model-dir"
 
-tokenizer = AutoTokenizer.from_pretrained(model_dir)
-model = CamembertForQuestionAnswering.from_pretrained(model_dir)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-text = None
-question = None
-predicted_answer = None
+    tokenizer = AutoTokenizer.from_pretrained(model_dir)
+    model = CamembertForQuestionAnswering.from_pretrained(model_dir)
+    model.to(device)
+    model.eval()
 
-# Keep predicting until we get a non-empty answer
-while predicted_answer is None or predicted_answer.strip() == "":
-    text, question, _ = get_example()
+    text = None
+    question = None
+    predicted_answer = None
 
-    inputs = tokenizer(question, text, return_tensors="pt")
-    with torch.no_grad():
-        outputs = model(**inputs)
+    # Keep predicting until we get a non-empty answer
+    while predicted_answer is None or predicted_answer.strip() == "":
+        text, question, _ = get_example()
 
-    answer_start_index = outputs.start_logits.argmax()
-    answer_end_index = outputs.end_logits.argmax()
+        inputs = tokenizer(question, text, return_tensors="pt")
+        with torch.no_grad():
+            outputs = model(**inputs.to(device))
 
-    predict_answer_tokens = inputs.input_ids[
-        0, answer_start_index : answer_end_index + 1
-    ]
+        answer_start_index = outputs.start_logits.argmax()
+        answer_end_index = outputs.end_logits.argmax()
 
-    predicted_answer = tokenizer.decode(predict_answer_tokens, skip_special_tokens=True)
+        predict_answer_tokens = inputs.input_ids[
+            0, answer_start_index : answer_end_index + 1
+        ]
 
-print(text)
-print(question)
-print(predicted_answer)
+        predicted_answer = tokenizer.decode(
+            predict_answer_tokens, skip_special_tokens=True
+        )
+
+    print(text)
+    print(question)
+    print(predicted_answer)
+
+
+if __name__ == "__main__":
+    main()
