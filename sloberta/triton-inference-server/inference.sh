@@ -1,4 +1,4 @@
-curl --location --request POST 'http://wn205.arnes.si:8000/v2/models/sloberta/infer' \
+curl --location --request POST 'http://localhost:8000/v2/models/sloberta/infer' \
      --header 'Content-Type: application/json' \
      --data-raw '{
         "inputs":[
